@@ -36,3 +36,17 @@ async def test_access_blocks_other_users() -> None:
     assert await mw(handler, object(), {"event_from_user": SimpleNamespace(id=2)}) is None  # type: ignore[arg-type]
     assert await mw(handler, object(), {}) is None  # type: ignore[arg-type]
     handler.assert_not_awaited()
+
+
+async def test_access_denied_message_shows_user_id() -> None:
+    from aiogram.types import Chat, Message
+
+    handler = AsyncMock()
+    mw = AccessMiddleware(frozenset({1}))
+    message = Message.model_construct(chat=Chat.model_construct(id=2, type="private"))
+    answer = AsyncMock()
+    object.__setattr__(message, "answer", answer)
+    await mw(handler, message, {"event_from_user": SimpleNamespace(id=2)})  # type: ignore[arg-type]
+    handler.assert_not_awaited()
+    answer.assert_awaited_once()
+    assert "2" in answer.await_args.args[0]

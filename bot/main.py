@@ -31,6 +31,7 @@ async def main() -> None:
     bot = Bot(settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = build_dispatcher(settings.allowed_user_ids)
 
+    logger.info("allowed user ids: %s", sorted(settings.allowed_user_ids))
     logger.info("starting polling")
     try:
         # start_polling сам обрабатывает SIGTERM/SIGINT и закрывает HTTP-сессию бота.
