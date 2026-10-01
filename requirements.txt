@@ -1,8 +1,0 @@
-aiogram==3.31.0
-anthropic==1.11.0
-SQLAlchemy[asyncio]==2.1.1
-asyncpg==0.31.0
-aiosqlite==0.22.1
-alembic==1.20.0
-pydantic==2.13.5
-pydantic-settings==2.15.0
