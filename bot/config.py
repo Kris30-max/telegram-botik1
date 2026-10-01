@@ -1,7 +1,8 @@
+import sys
 from functools import lru_cache
 from typing import Annotated
 
-from pydantic import Field, field_validator
+from pydantic import Field, ValidationError, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -41,3 +42,15 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()  # type: ignore[call-arg]
+
+
+def load_settings() -> Settings:
+    """Загружает настройки; при ошибке завершает процесс с понятным сообщением без секретов."""
+    try:
+        return get_settings()
+    except ValidationError as exc:
+        names = sorted({str(err["loc"][0]).upper() for err in exc.errors() if err["loc"]})
+        sys.exit(
+            "Ошибка конфигурации: не заданы или некорректны переменные окружения: "
+            + ", ".join(names)
+        )

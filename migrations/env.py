@@ -5,7 +5,7 @@ from alembic import context
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from bot.config import get_settings
+from bot.config import load_settings
 from bot.db.base import Base
 
 config = context.config
@@ -13,7 +13,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
-database_url = get_settings().database_url
+database_url = load_settings().database_url
 
 
 def run_migrations_offline() -> None:

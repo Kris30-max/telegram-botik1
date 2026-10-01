@@ -27,9 +27,9 @@ Telegram-бот — личный фитнес-ассистент. Помогае
 
 ## Инфраструктура
 - Репозиторий: https://github.com/Kris30-max/telegram-botik1 (ветка `main` = production)
-- Хостинг: Railway — сервис `bot` (Dockerfile, `railway.toml`) + плагин Postgres.
+- Хостинг: Railway — сервис `bot` (Dockerfile; настройки сервиса — в UI Railway) + плагин Postgres.
   Push в `main` → GitHub Actions (ruff + pytest) → Railway автодеплой (Wait for CI).
-- Миграции — `preDeployCommand = alembic upgrade head`. Long polling, **ровно 1 реплика**.
+- Миграции — `alembic upgrade head` в CMD контейнера перед стартом бота (config-as-code Railway недоступен). Long polling, **ровно 1 реплика**.
 - Секреты только в Railway Variables / локальном `.env`. Никогда не коммитить токены.
 
 ## Структура (целевая)
@@ -47,7 +47,7 @@ fitness-bot/
 │   ├── middlewares/       # db-сессия, белый список, throttling
 │   └── data/              # справочники: продукты (КБЖУ на 100 г), упражнения
 ├── migrations/  tests/  docs/  scripts/  .github/workflows/
-├── Dockerfile  railway.toml  pyproject.toml  requirements.txt  .env.example
+├── Dockerfile  pyproject.toml  requirements.txt  .env.example
 └── CLAUDE.md  PROJECT_IDEA.md
 ```
 

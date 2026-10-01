@@ -15,4 +15,5 @@ COPY . .
 RUN useradd --create-home --uid 1000 app
 USER app
 
-CMD ["python", "-m", "bot.main"]
+# Миграции перед стартом: Railway config-as-code (preDeployCommand) для сервиса недоступен.
+CMD ["sh", "-c", "alembic upgrade head && exec python -m bot.main"]

@@ -102,7 +102,6 @@ telegram-botik1/
 ├── .github/workflows/ci.yml
 ├── Dockerfile
 ├── .dockerignore
-├── railway.toml
 ├── alembic.ini
 ├── requirements.txt
 ├── requirements-dev.txt
@@ -269,25 +268,21 @@ LLM допустимо использовать только для тексто
 - **Replicas = 1.** Две копии бота в режиме polling конфликтуют
   (`TelegramConflictError: terminated by other getUpdates request`).
 
-### 9.2. `railway.toml` (config as code)
-```toml
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+### 9.2. Настройки сервиса (UI Railway)
+Railway Config as Code (`railway.toml`) объявлен устаревшим и недоступен для новых сервисов
+(с 2026-08-28), поэтому настройки задаются в UI сервиса:
+- Builder — Dockerfile (определяется автоматически по `Dockerfile` в корне).
+- Restart policy — On Failure; Replicas — 1; Wait for CI — включено.
+- Миграции выполняются при старте контейнера: `CMD sh -c "alembic upgrade head && exec python -m bot.main"`.
+  При одной реплике это безопасно; если миграция падает, бот не стартует.
 
-[deploy]
-preDeployCommand = ["alembic upgrade head"]
-startCommand = "python -m bot.main"
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
-```
 Во время выкатки старый и новый контейнер могут кратко работать одновременно — для polling
 это даёт несколько секунд предупреждений о конфликте; бот должен корректно завершаться по SIGTERM
 (`dp.stop_polling()`, закрытие сессий БД и HTTP), чтобы окно было минимальным.
 
 ### 9.3. Dockerfile (схема)
 `python:3.12-slim` → установка `requirements.txt` (слой кэшируется) → копирование кода →
-непривилегированный пользователь → `CMD ["python", "-m", "bot.main"]`.
+непривилегированный пользователь → CMD: миграции, затем `python -m bot.main` (см. 9.2).
 `PYTHONUNBUFFERED=1`, чтобы логи сразу попадали в Railway.
 
 ### 9.4. Webhook (опционально, позже)
@@ -350,7 +345,7 @@ BMR = 10·85 + 6.25·180 − 5·30 + 5 = 1830; TDEE = 2836.5; дефицит 17%
 1. Установить на машину Git и Python 3.12; клонировать репозиторий.
 2. Каркас: `pyproject.toml`, `requirements*.txt`, `.gitignore`, `.env.example`, `bot/config.py`,
    `bot/main.py` с `/start` → «Привет».
-3. Dockerfile, `railway.toml`, CI workflow.
+3. Dockerfile, CI workflow.
 4. Railway: проект, Postgres, сервис из GitHub, переменные, Wait for CI.
 5. Первый деплой: бот отвечает на `/start` из Railway. ✔ — этап закрыт.
 

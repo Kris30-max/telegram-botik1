@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -62,3 +64,19 @@ def test_empty_required_var_rejected(env: pytest.MonkeyPatch) -> None:
     env.setenv("BOT_TOKEN", "")
     with pytest.raises(ValidationError):
         make()
+
+
+def test_load_settings_exits_with_missing_names(env: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    from bot import config
+
+    env.delenv("BOT_TOKEN")
+    env.setenv("ALLOWED_USER_IDS", "not-a-number")
+    env.chdir(tmp_path)
+    config.get_settings.cache_clear()
+    with pytest.raises(SystemExit) as exc_info:
+        config.load_settings()
+    config.get_settings.cache_clear()
+    message = str(exc_info.value.code)
+    assert "BOT_TOKEN" in message
+    assert "ALLOWED_USER_IDS" in message
+    assert "sk-test" not in message

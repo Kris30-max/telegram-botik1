@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-from bot.config import get_settings
+from bot.config import load_settings
 from bot.db.base import create_engine
 from bot.handlers import start
 from bot.logging import setup_logging
@@ -24,7 +24,7 @@ def build_dispatcher(allowed_user_ids: frozenset[int]) -> Dispatcher:
 
 
 async def main() -> None:
-    settings = get_settings()
+    settings = load_settings()
     setup_logging(settings.log_level)
 
     engine = create_engine(settings.database_url)
